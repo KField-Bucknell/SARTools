@@ -49,7 +49,7 @@ loadCountData <- function(target, rawDir="raw", skip=0, header=TRUE, idColumn=1,
   # check that input counts are integers to fit edgeR and DESeq2 requirements
   # round them off to integers if they are not
   if (any(counts %% 1 != 0)) {
-    counts <- as.integer(round(counts))
+    counts <- round(counts)
     cat("Rounded counts to integers to meet requirements of edgeR and DESeq2.\n")
   }
   
