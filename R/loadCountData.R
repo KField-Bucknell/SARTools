@@ -5,36 +5,27 @@
 #' @param target target \code{data.frame} of the project returned by \code{loadTargetFile()}
 #' @param rawDir path to the directory containing the count files
 #' @param skip number of lines of the data file to skip before beginning to read data
+#' @param idColumn the column number with feature Ids (default = 1)
+#' @param countColumn the column number with counts (default = 2)
 #' @param featuresToRemove vector of feature Ids (or character string common to feature Ids) to remove from the counts
 #' @return The \code{matrix} of raw counts with row names corresponding to the feature Ids and column names to the sample names as provided in the first column of the target.
 #' @details If \code{featuresToRemove} is equal to \code{"rRNA"}, all the features containing the character string "rRNA" will be removed from the counts.
 #' @author Marie-Agnes Dillies and Hugo Varet
 
-loadCountData <- function(target, rawDir="raw", skip=0, featuresToRemove=c("alignment_not_unique", "ambiguous", "no_feature", "not_aligned", "too_low_aQual")){
+loadCountData <- function(target, rawDir="raw", skip=0, idColumn=1, countColumn=2, featuresToRemove=c("alignment_not_unique", "ambiguous", "no_feature", "not_aligned", "too_low_aQual")){
   
   labels <- as.character(target[,1])
   files <- as.character(target[,2])
   
-  # detect if input count files are from featureCounts or HTSeq-count
-  f1 <- read.table(file.path(rawDir, files[1]), sep="\t", quote="\"", header=FALSE, skip=5, nrows=5, stringsAsFactors=FALSE)
-  if (ncol(f1) >= 7 && is.numeric(f1[,7])){
-    # counter featurecounts
-    idCol <- 1
-    countsCol <- 7
-    header <- TRUE
-  } else{
-    if (ncol(f1) >= 2 && is.numeric(f1[,2])){
-      # counter htseq-count
-      idCol <- 1
-      countsCol <- 2
-      header <- FALSE
-    } else{
-      stop("Can't determine if count files come from HTSeq-count or featureCounts")
-    }
+  # detect if input columns have exected format
+  f1 <- read.table(file.path(rawDir, files[1]), sep="\t", quote="\"", header=TRUE, skip=skip, stringsAsFactors=FALSE)
+  if (!(is.character(f1[,idColumn]) & is.numeric(f1[,countColumn]) & (ncol(f1) >= max(idColumn,countColumn)) )){
+    stop("Columns do not match expectations. Confirm that column ", idColumn, 
+         " contains feature Ids and column ", countColumn, " contains counts.")
   }
   
-  rawCounts <- read.table(file.path(rawDir, files[1]), sep="\t", quote="\"", header=header, skip=skip, stringsAsFactors=FALSE)
-  rawCounts <- rawCounts[,c(idCol, countsCol)]
+  rawCounts <- read.table(file.path(rawDir, files[1]), sep="\t", quote="\"", header=TRUE, skip=skip, stringsAsFactors=FALSE)
+  rawCounts <- rawCounts[,c(idColumn, countColumn)]
   colnames(rawCounts) <- c("Id", labels[1])
   if (any(duplicated(rawCounts$Id))) stop("Duplicated feature names in ", files[1])
   cat("Loading files:\n")
@@ -55,15 +46,10 @@ loadCountData <- function(target, rawDir="raw", skip=0, featuresToRemove=c("alig
   counts <- counts[order(rownames(counts)),]
   
   # check that input counts are integers to fit edgeR and DESeq2 requirements
-  if (any(counts %% 1 != 0)) stop("Input counts are not integer values as required by DESeq2 and edgeR.")
-  
-  cat("\nFeatures removed:\n")
-  for (f in setdiff(featuresToRemove,"")){
-    match <- grep(f, rownames(counts))
-    if (length(match)>0){
-      cat(rownames(counts)[match],sep="\n")
-      counts <- counts[-match,]
-    }
+  # round them off to integers if they are not
+  if (any(counts %% 1 != 0)) {
+    counts <- as.integer(round(counts))
+    cat("Rounded counts to integers to meet requirements of edgeR and DESeq2.\n")
   }
   
   cat("\nTop of the counts matrix:\n")
