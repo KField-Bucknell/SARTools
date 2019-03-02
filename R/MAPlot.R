@@ -12,11 +12,6 @@
 MAPlot <- function(complete, alpha=0.05, outfile=TRUE, FClimit=0){
   ncol <- ifelse(length(complete)<=4, ceiling(sqrt(length(complete))), 3)
   nrow <- ceiling(length(complete)/ncol)
-  if (FClimit==0) {
-    ylim <- 1.1 * c(-1,1) * quantile(abs(log2FC[is.finite(log2FC)]), probs=0.99) 
-  } else {
-    ylim <- c(-FClimit, FClimit)
-  }
   if (outfile) png(filename="figures/MAPlot.png", width=cairoSizeWrapper(1800*ncol), height=cairoSizeWrapper(1800*nrow), res=300)
     par(mfrow=c(nrow,ncol))
       for (name in names(complete)){
@@ -24,6 +19,11 @@ MAPlot <- function(complete, alpha=0.05, outfile=TRUE, FClimit=0){
         complete.name <- complete.name[complete.name$baseMean>0,]
         complete.name$padj <- ifelse(is.na(complete.name$padj),1,complete.name$padj)
         log2FC <- complete.name$log2FoldChange
+        if (FClimit==0) {
+          ylim <- 1.1 * c(-1,1) * quantile(abs(log2FC[is.finite(log2FC)]), probs=0.99) 
+        } else {
+          ylim <- c(-FClimit, FClimit)
+        }
         plot(complete.name$baseMean, pmax(ylim[1], pmin(ylim[2], log2FC)),
 	         log = "x", cex=0.45, las = 1, ylim = ylim,
              col = ifelse(complete.name[,"padj"] < alpha, "red", "black"),
