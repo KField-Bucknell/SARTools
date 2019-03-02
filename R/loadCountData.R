@@ -7,24 +7,25 @@
 #' @param skip number of lines of the data file to skip before beginning to read data
 #' @param idColumn the column number with feature Ids (default = 1)
 #' @param countColumn the column number with counts (default = 2)
+#' @param header default set to header=TRUE, set to FALSE if count file has no header row
 #' @param featuresToRemove vector of feature Ids (or character string common to feature Ids) to remove from the counts
 #' @return The \code{matrix} of raw counts with row names corresponding to the feature Ids and column names to the sample names as provided in the first column of the target.
 #' @details If \code{featuresToRemove} is equal to \code{"rRNA"}, all the features containing the character string "rRNA" will be removed from the counts.
 #' @author Marie-Agnes Dillies and Hugo Varet
 
-loadCountData <- function(target, rawDir="raw", skip=0, idColumn=1, countColumn=2, featuresToRemove=c("alignment_not_unique", "ambiguous", "no_feature", "not_aligned", "too_low_aQual")){
+loadCountData <- function(target, rawDir="raw", skip=0, header=TRUE, idColumn=1, countColumn=2, featuresToRemove=c("alignment_not_unique", "ambiguous", "no_feature", "not_aligned", "too_low_aQual")){
   
   labels <- as.character(target[,1])
   files <- as.character(target[,2])
   
   # detect if input columns have exected format
-  f1 <- read.table(file.path(rawDir, files[1]), sep="\t", quote="\"", header=TRUE, skip=skip, stringsAsFactors=FALSE)
+  f1 <- read.table(file.path(rawDir, files[1]), sep="\t", quote="\"", header=header, skip=skip, stringsAsFactors=FALSE)
   if (!(is.character(f1[,idColumn]) & is.numeric(f1[,countColumn]) & (ncol(f1) >= max(idColumn,countColumn)) )){
     stop("Columns do not match expectations. Confirm that column ", idColumn, 
          " contains feature Ids and column ", countColumn, " contains counts.")
   }
   
-  rawCounts <- read.table(file.path(rawDir, files[1]), sep="\t", quote="\"", header=TRUE, skip=skip, stringsAsFactors=FALSE)
+  rawCounts <- read.table(file.path(rawDir, files[1]), sep="\t", quote="\"", header=header, skip=skip, stringsAsFactors=FALSE)
   rawCounts <- rawCounts[,c(idColumn, countColumn)]
   colnames(rawCounts) <- c("Id", labels[1])
   if (any(duplicated(rawCounts$Id))) stop("Duplicated feature names in ", files[1])
