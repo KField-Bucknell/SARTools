@@ -51,6 +51,21 @@ make_option(c("-b", "--batch"),
 			dest="batch",
 			help="blocking factor [default: %default] or \"batch\" for example"),
 
+make_option(c("-i", "--idColumn"),
+            default=1,
+            dest="idColumn",
+            help="column with feature Ids [default: %default]"),
+
+make_option(c("-N", "--countColumn"),
+            default=2,
+            dest="countColumn",
+            help="column with counts  (2 for htseq-count, 7 for featurecounts, 5 for RSEM/Salmon, 4 for kallisto) [default: %default]"),
+
+make_option(c("-s", "--rowSkip"),
+            default=0,
+            dest="rowSkip",
+            help="rows to skip (not including header) [default: %default]"),
+
 make_option(c("-f", "--fitType"),
 			default="parametric",
 			dest="fitType", 
@@ -116,6 +131,9 @@ featuresToRemove <- unlist(strsplit(opt$FTR, ","))   # names of the features to 
 varInt <- opt$varInt                                 # factor of interest
 condRef <- opt$condRef                               # reference biological condition
 batch <- opt$batch                                   # blocking factor: NULL (default) or "batch" for example
+idColumn = opt$idColumn                              # column with feature Ids (usually 1)
+countColumn = opt$countColumn                        # column with counts  (2 for htseq-count, 7 for featurecounts, 5 for RSEM/Salmon, 4 for kallisto)
+rowSkip = opt$rowSkip                                # rows to skip (not including header) 
 fitType <- opt$fitType                               # mean-variance relationship: "parametric" (default), "local" or "mean"
 cooksCutoff <- opt$cooksCutoff                       # outliers detection threshold (NULL to let DESeq2 choosing it)
 independentFiltering <- opt$independentFiltering     # TRUE/FALSE to perform independent filtering (default is TRUE)
@@ -133,6 +151,9 @@ forceCairoGraph <- opt$forceCairoGraph				 # force cairo as plotting device if e
 # print(paste("varInt", varInt))
 # print(paste("condRef", condRef))
 # print(paste("batch", batch))
+# print(paste("idColumn", idColumn))
+# print(paste("countColumn", countColumn))
+# print(paste("rowSkip", rowSkip))
 # print(paste("fitType", fitType))
 # print(paste("cooksCutoff", cooksCutoff))
 # print(paste("independentFiltering", independentFiltering))
@@ -162,7 +183,8 @@ if (problem) quit(save="yes")
 target <- loadTargetFile(targetFile=targetFile, varInt=varInt, condRef=condRef, batch=batch)
 
 # loading counts
-counts <- loadCountData(target=target, rawDir=rawDir, featuresToRemove=featuresToRemove)
+counts <- loadCountData(target=target, rawDir=rawDir, featuresToRemove=featuresToRemove, 
+                        skip=rowSkip, idColumn=idColumn, countColumn=countColumn)
 
 # description plots
 majSequences <- descriptionPlots(counts=counts, group=target[,varInt], col=colors)

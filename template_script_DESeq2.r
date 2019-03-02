@@ -25,6 +25,10 @@ varInt <- "group"                                    # factor of interest
 condRef <- "WT"                                      # reference biological condition
 batch <- NULL                                        # blocking factor: NULL (default) or "batch" for example
 
+idColumn = 1                                         # column with feature Ids (usually 1)
+countColumn = 2                                      # column with counts  (2 for htseq-count, 7 for featurecounts, 5 for RSEM/Salmon, 4 for kallisto)
+rowSkip = 0                                          # rows to skip (not including header) 
+
 fitType <- "parametric"                              # mean-variance relationship: "parametric" (default), "local" or "mean"
 cooksCutoff <- TRUE                                  # TRUE/FALSE to perform the outliers detection (default is TRUE)
 independentFiltering <- TRUE                         # TRUE/FALSE to perform independent filtering (default is TRUE)
@@ -57,7 +61,8 @@ checkParameters.DESeq2(projectName=projectName,author=author,targetFile=targetFi
 target <- loadTargetFile(targetFile=targetFile, varInt=varInt, condRef=condRef, batch=batch)
 
 # loading counts
-counts <- loadCountData(target=target, rawDir=rawDir, featuresToRemove=featuresToRemove)
+counts <- loadCountData(target=target, rawDir=rawDir, featuresToRemove=featuresToRemove, 
+                        skip=rowSkip, idColumn=idColumn, countColumn=countColumn)
 
 # description plots
 majSequences <- descriptionPlots(counts=counts, group=target[,varInt], col=colors)
