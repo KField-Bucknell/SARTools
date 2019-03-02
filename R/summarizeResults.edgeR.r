@@ -41,10 +41,6 @@ summarizeResults.edgeR <- function(out.edgeR, group, counts, alpha=0.05,
   
   # Volcano plots
   volcanoPlot(complete=complete, alpha=alpha, adjPlimit=adjPlimit)
-<<<<<<< HEAD
-=======
-  volcanoPlot(complete=complete, alpha=alpha, FClimit=FClimit, adjPlimit=adjPlimit)
->>>>>>> fa0a5b8bdf866947b8adc5303766890a08e2922c
   
   return(list(complete=complete, nDiffTotal=nDiffTotal))
 }
