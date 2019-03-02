@@ -34,7 +34,7 @@ loadCountData <- function(target, rawDir="raw", skip=0, header=TRUE, idColumn=1,
   
   for (i in 2:length(files)){
     tmp <- read.table(file.path(rawDir, files[i]), sep="\t", quote="\"", header=header, skip=skip, stringsAsFactors=FALSE)
-    tmp <- tmp[,c(idCol, countsCol)]
+    tmp <- tmp[,c(idColumn, countColumn)]
     colnames(tmp) <- c("Id", labels[i])
     if (any(duplicated(tmp$Id))) stop("Duplicated feature names in ", files[i])
     rawCounts <- merge(rawCounts, tmp, by="Id", all=TRUE)
