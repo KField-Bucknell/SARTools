@@ -7,11 +7,14 @@
 #' @param counts matrix of raw counts
 #' @param alpha significance threshold to apply to the adjusted p-values
 #' @param col colors for the plots
+#' @param FClimit optional limit for log2 fold change on MA plot
+#' @param adjPlimit optional limit for -log10 adjusted P value for Volcano plot
 #' @return A list containing: (i) a list of \code{data.frames} from \code{exportResults.edgeR()} and (ii) a table summarizing the number of differentially expressed features
 #' @author Hugo Varet
 
 summarizeResults.edgeR <- function(out.edgeR, group, counts, alpha=0.05,
-                                   col=c("lightblue","orange","MediumVioletRed","SpringGreen")){  
+                                   col=c("lightblue","orange","MediumVioletRed","SpringGreen"),
+                                   FClimit=0, adjPlimit=0){  
   # create the figures/tables directory if does not exist
   if (!I("figures" %in% dir())) dir.create("figures", showWarnings=FALSE)
   if (!I("tables" %in% dir())) dir.create("tables", showWarnings=FALSE)
@@ -34,10 +37,10 @@ summarizeResults.edgeR <- function(out.edgeR, group, counts, alpha=0.05,
   rawpHist(complete=complete)
   
   # MA-plots
-  MAPlot(complete=complete, alpha=alpha)
+  MAPlot(complete=complete, alpha=alpha, FClimit=FClimit)
   
   # Volcano plots
-  volcanoPlot(complete=complete, alpha=alpha)
+  volcanoPlot(complete=complete, alpha=alpha, adjPlimit=adjPlimit)
   
   return(list(complete=complete, nDiffTotal=nDiffTotal))
 }
