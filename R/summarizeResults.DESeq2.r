@@ -57,6 +57,7 @@ summarizeResults.DESeq2 <- function(out.DESeq2, group, independentFiltering=TRUE
  
   # Volcano plots
   volcanoPlot(complete=complete, alpha=alpha, adjPlimit=adjPlimit)
+  volcanoPlot(complete=complete, alpha=alpha, FClimit=FClimit, adjPlimit=adjPlimit)
  
   return(list(complete=complete, tabIndepFiltering=tabIndepFiltering, nDiffTotal=nDiffTotal))
 }
